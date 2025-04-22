@@ -1,2 +1,5 @@
-# repertoire_automation
-Python automation for the repertoire minigame in Genshin Impact
+# Repertoire Automation
+
+A tool for automating the minigame Repertoire of Myriad Melodies.
+
+## Sumary
