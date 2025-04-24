@@ -3,6 +3,8 @@ from dataclasses import field
 
 import pyautogui
 
+pyautogui.PAUSE = 0
+
 @dataclass
 class Key:
     x_position: int = field(default = 0)
@@ -13,6 +15,12 @@ class Key:
     color: tuple[int, int, int] = field(default_factory = lambda: (255, 255, 255))
 
 
+    def is_key_present_in_interface(self):
+        if pyautogui.pixelMatchesColor(self.x_position, self.y_position, self.color, tolerance=30):
+            return True
+        
+        return False
+    
     def is_note_in_key(self):
         if not pyautogui.pixelMatchesColor(self.x_position, self.y_position, self.color, tolerance=30):
             return True
@@ -20,7 +28,8 @@ class Key:
         return False
     
     def press(self) -> None:
-        pyautogui.press(self.keyboard_key)
+        pyautogui.keyDown(self.keyboard_key)
+        pyautogui.keyUp(self.keyboard_key)
 
     def hold(self):
         pyautogui.keyDown(self.keyboard_key)
