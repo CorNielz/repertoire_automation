@@ -9,7 +9,7 @@ class Key:
     y_position: int = field(default = 0)
 
     keyboard_key: str = field(default = "")
-
+    is_key_hold: bool = field(default = False)
     color: tuple[int, int, int] = field(default_factory = lambda: (255, 255, 255))
 
 
@@ -18,3 +18,12 @@ class Key:
             return True
         
         return False
+    
+    def press(self) -> None:
+        pyautogui.press(self.keyboard_key)
+
+    def hold(self):
+        pyautogui.keyDown(self.keyboard_key)
+
+    def release(self):
+        pyautogui.keyUp(self.keyboard_key)
