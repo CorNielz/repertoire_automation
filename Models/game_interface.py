@@ -32,10 +32,10 @@ class GameInterface:
 
     def is_game_on_screen(self) -> bool:
         for key in self.keys:
-            if not key.is_key_present_in_interface():
-                return False
+            if key.is_key_present_in_interface():
+                return True
             
-        return True
+        return False
 
     def __init__(self):
         self.keys = []
