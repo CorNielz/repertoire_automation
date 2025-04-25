@@ -7,8 +7,6 @@ from Constants.interface import KEYS_DATA
 
 from Models.key import Key
 
-pyautogui.PAUSE = 0
-
 @dataclass
 class GameInterface:
     screen_width: int = field(default = 0)
