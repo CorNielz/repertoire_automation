@@ -36,16 +36,16 @@ class RepertoireAutomation:
 
     def process_key(event: Event, key: Key) -> None:
         while not event.is_set():
-            is_note_in_key = key.is_note_in_key()
-
-            if is_note_in_key and not key.is_note_active:
+            is_note_in_key = key.get_note_in_key()
+            
+            if is_note_in_key == "None":
+                continue
+            elif is_note_in_key == "Press":
                 key.press()
-                key.is_note_active = True
-
-                time.sleep(0.01)
-
-            elif not is_note_in_key and key.is_note_active:
-                key.is_note_active = False
+            elif is_note_in_key == "Hold":
+                key.hold()
+                
+            time.sleep(0.05)
 
 
 if __name__ == "__main__":
