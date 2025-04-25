@@ -3,7 +3,8 @@ from dataclasses import field
 
 import pyautogui
 
-pyautogui.PAUSE = 0
+from Constants.interface import KEY_COLOR
+from Constants.cooldown import KEY_PRESS_INTERVAL
 
 @dataclass
 class Key:
@@ -12,7 +13,10 @@ class Key:
 
     keyboard_key: str = field(default = "")
     is_key_hold: bool = field(default = False)
-    color: tuple[int, int, int] = field(default_factory = lambda: (255, 255, 255))
+
+    color: tuple[int, int, int] = field(default_factory = lambda: KEY_COLOR)
+
+    is_note_active: bool = field(default = False)
 
 
     def is_key_present_in_interface(self):
@@ -28,8 +32,10 @@ class Key:
         return False
     
     def press(self) -> None:
-        pyautogui.keyDown(self.keyboard_key)
-        pyautogui.keyUp(self.keyboard_key)
+        if self.is_note_active:
+            return 
+        
+        pyautogui.press(self.keyboard_key, interval=KEY_PRESS_INTERVAL)
 
     def hold(self):
         pyautogui.keyDown(self.keyboard_key)
