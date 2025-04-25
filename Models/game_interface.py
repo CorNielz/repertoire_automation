@@ -24,6 +24,8 @@ class GameInterface:
 
             current_key.x_position = KEYS_DATA[key_index]["X"]
             current_key.y_position = KEYS_DATA[key_index]["Y"]
+            current_key.height = KEYS_DATA[key_index]["Height"]
+            current_key.width = KEYS_DATA[key_index]["Width"]
             current_key.keyboard_key = KEYS_DATA[key_index]["Key"]
 
             self.keys.append(current_key)

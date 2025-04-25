@@ -10,6 +10,8 @@ from Constants.cooldown import KEY_PRESS_INTERVAL
 class Key:
     x_position: int = field(default = 0)
     y_position: int = field(default = 0)
+    height: int = field(default = 0)
+    width: int = field(default = 0)
 
     keyboard_key: str = field(default = "")
     is_key_hold: bool = field(default = False)
@@ -18,13 +20,21 @@ class Key:
 
     is_note_active: bool = field(default = False)
     
-    
-    def is_note_in_key(self):
-        if not pyautogui.pixelMatchesColor(self.x_position, self.y_position, self.color, tolerance=30):
-            return True
-        
-        return False
-    
+    def get_note_in_key(self) -> str:
+        try:
+            pyautogui.locateOnScreen("./Images/Press_Note.png", region=self.region(), confidence=0.98)
+            return "Press"
+        except pyautogui.ImageNotFoundException:
+            pass 
+
+        try:
+            pyautogui.locateOnScreen("./Images/Hold_Note.png", region=self.region(), confidence=0.98)
+            return "Hold"
+        except pyautogui.ImageNotFoundException:
+            pass
+
+        return "None"
+
     def press(self) -> None:
         if self.is_note_active:
             return 
@@ -36,3 +46,6 @@ class Key:
 
     def release(self):
         pyautogui.keyUp(self.keyboard_key)
+
+    def region(self):
+        return (self.x_position, self.y_position, self.width, self.height)
