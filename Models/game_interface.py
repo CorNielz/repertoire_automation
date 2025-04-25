@@ -29,11 +29,11 @@ class GameInterface:
             self.keys.append(current_key)
 
     def is_game_on_screen(self) -> bool:
-        for key in self.keys:
-            if key.is_key_present_in_interface():
-                return True
-            
-        return False
+        try:
+            pyautogui.locateOnScreen("./Images/Key.png", confidence=0.8)
+            return True
+        except pyautogui.ImageNotFoundException: 
+            return False
 
     def __init__(self):
         self.keys = []

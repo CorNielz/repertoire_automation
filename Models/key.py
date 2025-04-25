@@ -17,13 +17,7 @@ class Key:
     color: tuple[int, int, int] = field(default_factory = lambda: KEY_COLOR)
 
     is_note_active: bool = field(default = False)
-
-
-    def is_key_present_in_interface(self):
-        if pyautogui.pixelMatchesColor(self.x_position, self.y_position, self.color, tolerance=30):
-            return True
-        
-        return False
+    
     
     def is_note_in_key(self):
         if not pyautogui.pixelMatchesColor(self.x_position, self.y_position, self.color, tolerance=30):
