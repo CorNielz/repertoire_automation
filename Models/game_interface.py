@@ -7,8 +7,6 @@ from Constants.interface import KEYS_DATA
 
 from Models.key import Key
 
-pyautogui.PAUSE = 0
-
 @dataclass
 class GameInterface:
     screen_width: int = field(default = 0)
@@ -26,16 +24,18 @@ class GameInterface:
 
             current_key.x_position = KEYS_DATA[key_index]["X"]
             current_key.y_position = KEYS_DATA[key_index]["Y"]
+            current_key.height = KEYS_DATA[key_index]["Height"]
+            current_key.width = KEYS_DATA[key_index]["Width"]
             current_key.keyboard_key = KEYS_DATA[key_index]["Key"]
 
             self.keys.append(current_key)
 
     def is_game_on_screen(self) -> bool:
-        for key in self.keys:
-            if key.is_key_present_in_interface():
-                return True
-            
-        return False
+        try:
+            pyautogui.locateOnScreen("./Images/Key.png", confidence=0.8)
+            return True
+        except pyautogui.ImageNotFoundException: 
+            return False
 
     def __init__(self):
         self.keys = []

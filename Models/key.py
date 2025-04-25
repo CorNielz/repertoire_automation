@@ -3,36 +3,58 @@ from dataclasses import field
 
 import pyautogui
 
-pyautogui.PAUSE = 0
+from Constants.interface import KEY_COLOR
+from Constants.cooldown import KEY_PRESS_INTERVAL
 
 @dataclass
 class Key:
     x_position: int = field(default = 0)
     y_position: int = field(default = 0)
+    height: int = field(default = 0)
+    width: int = field(default = 0)
 
     keyboard_key: str = field(default = "")
     is_key_hold: bool = field(default = False)
-    color: tuple[int, int, int] = field(default_factory = lambda: (255, 255, 255))
 
+    color: tuple[int, int, int] = field(default_factory = lambda: KEY_COLOR)
 
-    def is_key_present_in_interface(self):
-        if pyautogui.pixelMatchesColor(self.x_position, self.y_position, self.color, tolerance=30):
-            return True
-        
-        return False
+    is_note_active: bool = field(default = False)
     
-    def is_note_in_key(self):
-        if not pyautogui.pixelMatchesColor(self.x_position, self.y_position, self.color, tolerance=30):
-            return True
+    def get_note_in_key(self) -> str:
+        key_range_screenshot = pyautogui.screenshot("test.png", region=self.region())
+
+        for x in range(0, self.width, 10):
+            for y in range(0, self.height, 10):
+                note = self.match_note_color(key_range_screenshot.getpixel((x, y)))
+
+                if note != "None":
+                    return note
         
-        return False
-    
+        return "None"
+  
+    def match_note_color(self, color):
+        if color[0] in range(220, 250) and color[1] in range(160, 190) and color[2] in range(40, 70):
+            #(240, 180, 60)
+            return "Press"
+        elif color[0] in range(130, 160) and color[1] in range(110, 140) and color[2] in range(223, 260):
+            #(150, 130, 250)
+            return "Hold"
+        
+        return "None"
+
     def press(self) -> None:
-        pyautogui.keyDown(self.keyboard_key)
-        pyautogui.keyUp(self.keyboard_key)
+        if self.is_note_active:
+            return 
+        
+        pyautogui.press(self.keyboard_key, interval=KEY_PRESS_INTERVAL)
 
     def hold(self):
         pyautogui.keyDown(self.keyboard_key)
+        self.is_key_hold = True
 
     def release(self):
         pyautogui.keyUp(self.keyboard_key)
+        self.is_key_hold = False
+
+    def region(self):
+        return (self.x_position, self.y_position, self.width, self.height)
