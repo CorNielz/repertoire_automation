@@ -8,12 +8,11 @@ import time
 from threading import Event
 
 class RepertoireAutomation:
-    _game_off = Event()
     _game_interface = GameInterface()
 
     _is_autoplay_on = False
 
-    def run():
+    def run(keyboard_queue):
         while True:
             if not RepertoireAutomation._game_interface.is_game_on_screen():
                 RepertoireAutomation._is_autoplay_on = False
@@ -21,29 +20,31 @@ class RepertoireAutomation:
         
             if not RepertoireAutomation._is_autoplay_on:
                 RepertoireAutomation._is_autoplay_on = True
-                RepertoireAutomation.autoplay()
+                RepertoireAutomation.autoplay(keyboard_queue)
 
             time.sleep(1)
     
-    def autoplay():
+    def autoplay(keyboard_queue):
         for game_key in RepertoireAutomation._game_interface.keys:
-            ProcessesManager.send_work(RepertoireAutomation.process_key, game_key)
+            ProcessesManager.send_work(RepertoireAutomation.process_key, game_key, keyboard_queue)
 
-    def process_key(key: Key) -> None:
+    def process_key(key: Key, keyboard_queue) -> None:
         while True:            
+            have_key_been_pressed = False
             note_type = key.get_note_in_key()
             
             if note_type == "None":
                 time.sleep(0.05)
                 continue
 
+            
+
             elif note_type == "Press":
-                key.press()
+                have_key_been_pressed = True
+                keyboard_queue.put({"action": "Press", "key": key.keyboard_key})
+                
             elif note_type == "Hold":
-                key.hold()   
+                have_key_been_pressed = True
+                keyboard_queue.put({"action": "Hold", "key": key.keyboard_key})
 
             time.sleep(0.05)        
-
-
-if __name__ == "__main__":
-    RepertoireAutomation.run()
