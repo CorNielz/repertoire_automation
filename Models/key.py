@@ -42,5 +42,19 @@ class Key:
         
         return "None"
 
+    def press(self) -> None:
+        if self.is_note_active:
+            return 
+        
+        pyautogui.press(self.keyboard_key, interval=KEY_PRESS_INTERVAL)
+
+    def hold(self):
+        pyautogui.keyDown(self.keyboard_key)
+        self.is_key_hold = True
+
+    def release(self):
+        pyautogui.keyUp(self.keyboard_key)
+        self.is_key_hold = False
+
     def region(self):
         return (self.x_position, self.y_position, self.width, self.height)
