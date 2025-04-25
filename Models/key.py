@@ -21,18 +21,25 @@ class Key:
     is_note_active: bool = field(default = False)
     
     def get_note_in_key(self) -> str:
-        try:
-            pyautogui.locateOnScreen("./Images/Press_Note.png", region=self.region(), confidence=0.98)
+        key_range_screenshot = pyautogui.screenshot("test.png", region=self.region())
+
+        for x in range(0, self.width, 10):
+            for y in range(0, self.height, 10):
+                note = self.match_note_color(key_range_screenshot.getpixel((x, y)))
+
+                if note != "None":
+                    return note
+        
+        return "None"
+  
+    def match_note_color(self, color):
+        if color[0] in range(220, 250) and color[1] in range(160, 190) and color[2] in range(40, 70):
+            #(240, 180, 60)
             return "Press"
-        except pyautogui.ImageNotFoundException:
-            pass 
-
-        try:
-            pyautogui.locateOnScreen("./Images/Hold_Note.png", region=self.region(), confidence=0.98)
+        elif color[0] in range(130, 160) and color[1] in range(110, 140) and color[2] in range(223, 260):
+            #(150, 130, 250)
             return "Hold"
-        except pyautogui.ImageNotFoundException:
-            pass
-
+        
         return "None"
 
     def press(self) -> None:
@@ -43,9 +50,11 @@ class Key:
 
     def hold(self):
         pyautogui.keyDown(self.keyboard_key)
+        self.is_key_hold = True
 
     def release(self):
         pyautogui.keyUp(self.keyboard_key)
+        self.is_key_hold = False
 
     def region(self):
         return (self.x_position, self.y_position, self.width, self.height)
