@@ -1,5 +1,5 @@
 from multiprocessing import Queue
-
+from abc import ABC, abstractmethod
 import pyautogui
 
 from Constants.cooldown import KEY_PRESS_INTERVAL
@@ -44,30 +44,43 @@ class KeyboardManager:
             if not handler:
                 continue
 
-            handler(keyboard_key)
+            handler.execute_action(keyboard_key)
+       
+        
+    def __init__(self, queue: Queue, action_map: dict[KeyboardAction, "KeyboardActionInterface"]):
+        self.queue = queue
+        self.action_map = action_map
 
-    def _handle_press(self, keyboard_key: str) -> None:
+
+class KeyboardActionInterface(ABC):
+    @abstractmethod
+    def execute_action(self, keyboard_key: str) -> None:
+        pass
+        
+class PressAction(KeyboardActionInterface):
+    def __init__(self, action_handler: 'KeyboardActionHandler'):
+        self.action_handler = action_handler
+
+    def execute_action(self, keyboard_key: str) -> None:
         self.action_handler.press(keyboard_key)
 
-    def _handle_hold(self, keyboard_key: str) -> None:
+class HoldAction(KeyboardActionInterface):
+    def __init__(self, action_handler: 'KeyboardActionHandler'):
+        self.action_handler = action_handler
+
+    def execute_action(self, keyboard_key: str) -> None:
         if not self.action_handler.is_held(keyboard_key):
             self.action_handler.hold(keyboard_key)
         else:
             self.action_handler.release(keyboard_key)
-        
-    def __init__(self, queue: Queue, action_handler: KeyboardActionHandler):
-        self.queue = queue
-        self.action_handler = action_handler
-
-        self.action_map = {
-            KeyboardAction.PRESS: self._handle_press,
-            KeyboardAction.HOLD: self._handle_hold,
-        }
-        
-
 
 def start_keyboard(queue: Queue) -> None:
     action_handler = KeyboardActionHandler()
-    keyboard_manager = KeyboardManager(queue, action_handler)
+    action_map: dict[KeyboardAction, KeyboardActionInterface] = {
+        KeyboardAction.PRESS: PressAction(action_handler),
+        KeyboardAction.HOLD: HoldAction(action_handler),
+    }
+    
+    keyboard_manager = KeyboardManager(queue, action_map)
 
     keyboard_manager.run()
