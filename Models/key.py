@@ -41,7 +41,7 @@ class Key:
         elif color[0] in HOLD_COLOR_RANGE[0] and color[1] in HOLD_COLOR_RANGE[1] and color[2] in HOLD_COLOR_RANGE[2]:
             return KeyboardAction.HOLD
         
-        return KeyboardAction.NONE
+        return KeyboardAction.NONE 
 
     def press(self) -> None:
         if self.is_note_active:
