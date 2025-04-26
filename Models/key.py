@@ -3,8 +3,9 @@ from dataclasses import field
 
 import pyautogui
 
-from Constants.interface import KEY_COLOR
+from Constants.color import PRESS_COLOR_RANGE, HOLD_COLOR_RANGE
 from Constants.cooldown import KEY_PRESS_INTERVAL
+from Constants.interface import KEY_COLOR
 
 @dataclass
 class Key:
@@ -33,11 +34,9 @@ class Key:
         return "None"
   
     def match_note_color(self, color):
-        if color[0] in range(220, 250) and color[1] in range(160, 190) and color[2] in range(40, 70):
-            #(240, 180, 60)
+        if color[0] in PRESS_COLOR_RANGE[0] and color[1] in PRESS_COLOR_RANGE[1] and color[2] in PRESS_COLOR_RANGE[2]:
             return "Press"
-        elif color[0] in range(150, 160) and color[1] in range(125, 140) and color[2] in range(245, 260):
-            #(150, 130, 250)
+        elif color[0] in HOLD_COLOR_RANGE[0] and color[1] in HOLD_COLOR_RANGE[1] and color[2] in HOLD_COLOR_RANGE[2]:
             return "Hold"
         
         return "None"
