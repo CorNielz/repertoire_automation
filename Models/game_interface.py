@@ -3,6 +3,8 @@ from dataclasses import field
 
 import pyautogui
 
+from Constants.confidence import KEY_CONFIDENCE
+from Constants.image_path import KEY
 from Constants.interface import KEYS_DATA
 
 from Models.key import Key
@@ -32,7 +34,7 @@ class GameInterface:
 
     def is_game_on_screen(self) -> bool:
         try:
-            pyautogui.locateOnScreen("./Images/Key.png", confidence=0.8)
+            pyautogui.locateOnScreen(KEY, confidence=KEY_CONFIDENCE)
             return True
         except pyautogui.ImageNotFoundException: 
             return False

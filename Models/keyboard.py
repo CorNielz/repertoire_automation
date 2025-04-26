@@ -4,6 +4,8 @@ import pyautogui
 
 from Constants.cooldown import KEY_PRESS_INTERVAL
 
+from Enums.keyboard_action import KeyboardAction
+
 class Keyboard:
     def run(self):
         while True:
@@ -15,11 +17,11 @@ class Keyboard:
             keyboard_key = request.get("key")
             action = request.get("action")
 
-            if action == "Press":
+            if action == KeyboardAction.PRESS:
                 self.press(keyboard_key)
-            elif action == "Hold" and not keyboard_key in self.keys_held:
+            elif action == KeyboardAction.HOLD and not keyboard_key in self.keys_held:
                 self.hold(keyboard_key)
-            elif action == "Hold" and keyboard_key in self.keys_held:
+            elif action == KeyboardAction.HOLD and keyboard_key in self.keys_held:
                 self.release(keyboard_key)
 
     def press(self, keyboard_key: str) -> None:        

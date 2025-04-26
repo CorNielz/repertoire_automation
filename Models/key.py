@@ -3,8 +3,11 @@ from dataclasses import field
 
 import pyautogui
 
-from Constants.interface import KEY_COLOR
+from Constants.color import PRESS_COLOR_RANGE, HOLD_COLOR_RANGE
 from Constants.cooldown import KEY_PRESS_INTERVAL
+from Constants.interface import KEY_COLOR
+
+from Enums.keyboard_action import KeyboardAction
 
 @dataclass
 class Key:
@@ -27,20 +30,18 @@ class Key:
             for y in range(0, self.height, 10):
                 note = self.match_note_color(key_range_screenshot.getpixel((x, y)))
 
-                if note != "None":
+                if note != KeyboardAction.NONE:
                     return note
         
-        return "None"
+        return KeyboardAction.NONE
   
     def match_note_color(self, color):
-        if color[0] in range(220, 250) and color[1] in range(160, 190) and color[2] in range(40, 70):
-            #(240, 180, 60)
-            return "Press"
-        elif color[0] in range(150, 160) and color[1] in range(125, 140) and color[2] in range(245, 260):
-            #(150, 130, 250)
-            return "Hold"
+        if color[0] in PRESS_COLOR_RANGE[0] and color[1] in PRESS_COLOR_RANGE[1] and color[2] in PRESS_COLOR_RANGE[2]:
+            return KeyboardAction.PRESS
+        elif color[0] in HOLD_COLOR_RANGE[0] and color[1] in HOLD_COLOR_RANGE[1] and color[2] in HOLD_COLOR_RANGE[2]:
+            return KeyboardAction.HOLD
         
-        return "None"
+        return KeyboardAction.NONE
 
     def press(self) -> None:
         if self.is_note_active:

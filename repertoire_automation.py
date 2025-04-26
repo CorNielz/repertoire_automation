@@ -1,5 +1,9 @@
 from Configs import automation
 
+from Constants.cooldown import IS_GAME_RUNNING, NOTE_DETECTION
+
+from Enums.keyboard_action import KeyboardAction
+
 from Models.game_interface import GameInterface
 from Models.threads import ProcessesManager
 from Models.key import Key
@@ -22,7 +26,7 @@ class RepertoireAutomation:
                 RepertoireAutomation._is_autoplay_on = True
                 RepertoireAutomation.autoplay(keyboard_queue)
 
-            time.sleep(1)
+            time.sleep(IS_GAME_RUNNING)
     
     def autoplay(keyboard_queue):
         for game_key in RepertoireAutomation._game_interface.keys:
@@ -33,18 +37,18 @@ class RepertoireAutomation:
             have_key_been_pressed = False
             note_type = key.get_note_in_key()
             
-            if note_type == "None":
-                time.sleep(0.05)
+            if note_type == KeyboardAction.NONE:
+                time.sleep(NOTE_DETECTION)
                 continue
 
             
 
-            elif note_type == "Press":
+            elif note_type == KeyboardAction.PRESS:
                 have_key_been_pressed = True
-                keyboard_queue.put({"action": "Press", "key": key.keyboard_key})
+                keyboard_queue.put({"action": KeyboardAction.PRESS, "key": key.keyboard_key})
                 
-            elif note_type == "Hold":
+            elif note_type == KeyboardAction.HOLD:
                 have_key_been_pressed = True
-                keyboard_queue.put({"action": "Hold", "key": key.keyboard_key})
+                keyboard_queue.put({"action": KeyboardAction.HOLD, "key": key.keyboard_key})
 
-            time.sleep(0.05)        
+            time.sleep(NOTE_DETECTION)        
