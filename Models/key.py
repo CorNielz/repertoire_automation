@@ -7,6 +7,8 @@ from Constants.color import PRESS_COLOR_RANGE, HOLD_COLOR_RANGE
 from Constants.cooldown import KEY_PRESS_INTERVAL
 from Constants.interface import KEY_COLOR
 
+from Enums.keyboard_action import KeyboardAction
+
 @dataclass
 class Key:
     x_position: int = field(default = 0)
@@ -28,18 +30,18 @@ class Key:
             for y in range(0, self.height, 10):
                 note = self.match_note_color(key_range_screenshot.getpixel((x, y)))
 
-                if note != "None":
+                if note != KeyboardAction.NONE:
                     return note
         
-        return "None"
+        return KeyboardAction.NONE
   
     def match_note_color(self, color):
         if color[0] in PRESS_COLOR_RANGE[0] and color[1] in PRESS_COLOR_RANGE[1] and color[2] in PRESS_COLOR_RANGE[2]:
-            return "Press"
+            return KeyboardAction.PRESS
         elif color[0] in HOLD_COLOR_RANGE[0] and color[1] in HOLD_COLOR_RANGE[1] and color[2] in HOLD_COLOR_RANGE[2]:
-            return "Hold"
+            return KeyboardAction.HOLD
         
-        return "None"
+        return KeyboardAction.NONE
 
     def press(self) -> None:
         if self.is_note_active:
