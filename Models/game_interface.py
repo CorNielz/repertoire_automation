@@ -1,11 +1,37 @@
 from dataclasses import dataclass
 from dataclasses import field
-
+from typing import Protocol
 import pyautogui
 
-from Constants.interface import KEYS_DATA
+from Constants.confidence import KEY_CONFIDENCE
+from Constants.image_path import KEY
 
-from Models.key import Key
+from Models.key import Key, ColorBasedActionFetcher
+
+class KeyDataLoader(Protocol):
+    def load_keys(self) -> list[Key]:
+        pass
+
+class ConstantsKeyDataLoader():
+    def load_keys(self) -> list[Key]:
+        from Constants.interface import KEYS_DATA
+
+        keys = []
+        action_fetcher = ColorBasedActionFetcher()
+        
+        for key_index in KEYS_DATA:
+            current_key = Key(
+                action_fetcher=action_fetcher,
+                x_position = KEYS_DATA[key_index]["X"],
+                y_position = KEYS_DATA[key_index]["Y"],
+                height = KEYS_DATA[key_index]["Height"],
+                width = KEYS_DATA[key_index]["Width"],
+                keyboard_key = KEYS_DATA[key_index]["Key"],
+            )
+
+            keys.append(current_key)
+
+        return keys
 
 @dataclass
 class GameInterface:
@@ -14,31 +40,19 @@ class GameInterface:
 
     keys: list[Key] = field(default_factory = list)
 
-
-    def get_screen_resolution(self) -> None:
+    def update_screen_resolution(self) -> None:
         self.screen_width, self.screen_height = pyautogui.size()
 
-    def get_ingame_keys(self) -> None:
-        for key_index in KEYS_DATA:
-            current_key = Key()
-
-            current_key.x_position = KEYS_DATA[key_index]["X"]
-            current_key.y_position = KEYS_DATA[key_index]["Y"]
-            current_key.height = KEYS_DATA[key_index]["Height"]
-            current_key.width = KEYS_DATA[key_index]["Width"]
-            current_key.keyboard_key = KEYS_DATA[key_index]["Key"]
-
-            self.keys.append(current_key)
-
+class GameInterfaceDetection:
     def is_game_on_screen(self) -> bool:
         try:
-            pyautogui.locateOnScreen("./Images/Key.png", confidence=0.8)
+            pyautogui.locateOnScreen(KEY, confidence=KEY_CONFIDENCE)
             return True
         except pyautogui.ImageNotFoundException: 
             return False
+        
+def build_game_interface(loader: KeyDataLoader) -> GameInterface:
+    interface = GameInterface(keys=loader.load_keys())
+    interface.update_screen_resolution()
 
-    def __init__(self):
-        self.keys = []
-
-        GameInterface.get_screen_resolution(self)
-        GameInterface.get_ingame_keys(self)
+    return interface

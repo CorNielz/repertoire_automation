@@ -1,13 +1,29 @@
 from dataclasses import dataclass
 from dataclasses import field
-
+from typing import Protocol
 import pyautogui
 
-from Constants.interface import KEY_COLOR
-from Constants.cooldown import KEY_PRESS_INTERVAL
+from Enums.keyboard_action import KeyboardAction
 
+class GetNoteAction(Protocol):
+    def fetch_note_action(self) -> KeyboardAction:
+        pass
+
+class ColorBasedActionFetcher():
+    def fetch_note_action(self, color):
+        from Constants.color import PRESS_COLOR_RANGE, HOLD_COLOR_RANGE
+
+        if color[0] in PRESS_COLOR_RANGE[0] and color[1] in PRESS_COLOR_RANGE[1] and color[2] in PRESS_COLOR_RANGE[2]:
+            return KeyboardAction.PRESS
+        elif color[0] in HOLD_COLOR_RANGE[0] and color[1] in HOLD_COLOR_RANGE[1] and color[2] in HOLD_COLOR_RANGE[2]:
+            return KeyboardAction.HOLD
+        
+        return KeyboardAction.NONE
+    
 @dataclass
 class Key:
+    action_fetcher: GetNoteAction
+
     x_position: int = field(default = 0)
     y_position: int = field(default = 0)
     height: int = field(default = 0)
@@ -16,45 +32,17 @@ class Key:
     keyboard_key: str = field(default = "")
     is_key_hold: bool = field(default = False)
 
-    color: tuple[int, int, int] = field(default_factory = lambda: KEY_COLOR)
-
-    is_note_active: bool = field(default = False)
-    
-    def get_note_in_key(self) -> str:
+    def verify_note_type_in_key(self) -> str:
         key_range_screenshot = pyautogui.screenshot(region=self.region())
 
         for x in range(0, self.width, 10):
             for y in range(0, self.height, 10):
-                note = self.match_note_color(key_range_screenshot.getpixel((x, y)))
+                note = self.action_fetcher.fetch_note_action(key_range_screenshot.getpixel((x, y)))
 
-                if note != "None":
+                if note != KeyboardAction.NONE:
                     return note
         
-        return "None"
-  
-    def match_note_color(self, color):
-        if color[0] in range(220, 250) and color[1] in range(160, 190) and color[2] in range(40, 70):
-            #(240, 180, 60)
-            return "Press"
-        elif color[0] in range(150, 160) and color[1] in range(125, 140) and color[2] in range(245, 260):
-            #(150, 130, 250)
-            return "Hold"
-        
-        return "None"
-
-    def press(self) -> None:
-        if self.is_note_active:
-            return 
-        
-        pyautogui.press(self.keyboard_key, interval=KEY_PRESS_INTERVAL)
-
-    def hold(self):
-        pyautogui.keyDown(self.keyboard_key)
-        self.is_key_hold = True
-
-    def release(self):
-        pyautogui.keyUp(self.keyboard_key)
-        self.is_key_hold = False
-
+        return KeyboardAction.NONE
+    
     def region(self):
         return (self.x_position, self.y_position, self.width, self.height)
