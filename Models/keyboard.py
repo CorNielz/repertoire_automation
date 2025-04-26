@@ -6,7 +6,23 @@ from Constants.cooldown import KEY_PRESS_INTERVAL
 
 from Enums.keyboard_action import KeyboardAction
 
-class Keyboard:
+class KeyboardActionHandler:
+    def press(self, keyboard_key: str) -> None:        
+        pyautogui.press(keyboard_key, interval=KEY_PRESS_INTERVAL)
+
+    def hold(self, keyboard_key: str):
+        pyautogui.keyDown(keyboard_key)
+        self.keys_held.append(keyboard_key)
+
+    def release(self, keyboard_key):
+        pyautogui.keyUp(keyboard_key)
+        self.keys_held.remove(keyboard_key)
+
+    def __init__(self):
+        self.keys_held = []
+
+
+class KeyboardManager:
     def run(self):
         while True:
             if self.queue.empty():
@@ -24,22 +40,14 @@ class Keyboard:
             elif action == KeyboardAction.HOLD and keyboard_key in self.keys_held:
                 self.release(keyboard_key)
 
-    def press(self, keyboard_key: str) -> None:        
-        pyautogui.press(keyboard_key, interval=KEY_PRESS_INTERVAL)
-
-    def hold(self, keyboard_key: str):
-        pyautogui.keyDown(keyboard_key)
-        self.keys_held.append(keyboard_key)
-
-    def release(self, keyboard_key):
-        pyautogui.keyUp(keyboard_key)
-        self.keys_held.remove(keyboard_key)
+    def __init__(self, queue: Queue, action_handler: KeyboardActionHandler):
+        self.queue = queue
+        self.action_handler = action_handler
 
     
-    def __init__(self, queue: Queue):
-        self.queue = queue
-        self.keys_held = []
 
-def start_keyboard(queue):
-    keyboard = Keyboard(queue)
-    keyboard.run()
+def start_keyboard(queue: Queue):
+    action_handler = KeyboardActionHandler()
+    keyboard_manager = KeyboardManager(queue, action_handler)
+
+    keyboard_manager.run()
