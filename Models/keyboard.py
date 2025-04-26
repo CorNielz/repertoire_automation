@@ -1,6 +1,7 @@
 from multiprocessing import Queue
 from abc import ABC, abstractmethod
 import pyautogui
+import time
 
 from Constants.cooldown import KEY_PRESS_INTERVAL
 
@@ -13,10 +14,12 @@ class KeyboardActionHandler:
     def hold(self, keyboard_key: str) -> None:
         pyautogui.keyDown(keyboard_key)
         self.keys_held.append(keyboard_key)
+        time.sleep(KEY_PRESS_INTERVAL)
 
     def release(self, keyboard_key: str) -> None:
         pyautogui.keyUp(keyboard_key)
         self.keys_held.remove(keyboard_key)
+        time.sleep(KEY_PRESS_INTERVAL)
 
     def is_held(self, keyboard_key: str) -> bool:
         return keyboard_key in self.keys_held

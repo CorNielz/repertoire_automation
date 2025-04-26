@@ -1,4 +1,4 @@
-from Models.game_interface import GameInterface, GameInterfaceDetection
+from Models.game_interface import GameInterfaceDetection, ConstantsKeyDataLoader, build_game_interface
 from Models.keyboard import start_keyboard
 from Models.work import ProcessesManager
 
@@ -17,7 +17,8 @@ if __name__ == "__main__":
     game_interface_detection = GameInterfaceDetection()
     interface_manager = InterfaceManager(game_interface_detection)
 
-    game_interface = GameInterface()
+    key_loader = ConstantsKeyDataLoader()
+    game_interface = build_game_interface(key_loader)
     note_fetcher = NoteFetcher()
     key_processor = KeyProcessor(note_fetcher)
     processes_manager = ProcessesManager()

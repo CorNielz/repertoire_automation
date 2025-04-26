@@ -22,6 +22,8 @@ class ColorBasedActionFetcher():
     
 @dataclass
 class Key:
+    action_fetcher: GetNoteAction
+
     x_position: int = field(default = 0)
     y_position: int = field(default = 0)
     height: int = field(default = 0)
@@ -29,8 +31,6 @@ class Key:
 
     keyboard_key: str = field(default = "")
     is_key_hold: bool = field(default = False)
-
-    action_fetcher: GetNoteAction
 
     def verify_note_type_in_key(self) -> str:
         key_range_screenshot = pyautogui.screenshot(region=self.region())

@@ -28,7 +28,7 @@ class AutoplayManager:
 
     def autoplay_mode(self, keyboard_queue):
         for game_key in self._game_interface.keys:
-            self._work_manager.send_work(self._key_processor.process_key, (game_key, keyboard_queue))
+            self._work_manager.send_work(self._key_processor.process_key, game_key, keyboard_queue)
 
 class KeyProcessor:
     def __init__(self, note_fetcher: "NoteFetcher"):
@@ -38,14 +38,13 @@ class KeyProcessor:
         from Constants.cooldown import NOTE_DETECTION
 
         while True:            
-            have_key_been_pressed = False
             note_type = key.verify_note_type_in_key()
             
             if note_type == KeyboardAction.NONE:
                 time.sleep(NOTE_DETECTION)
                 continue
 
-            keyboard_queue.put({"action": KeyboardAction.PRESS, "key": key.keyboard_key})
+            keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
             time.sleep(NOTE_DETECTION)    
 
 class NoteFetcher:

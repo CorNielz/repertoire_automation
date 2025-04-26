@@ -6,7 +6,7 @@ import pyautogui
 from Constants.confidence import KEY_CONFIDENCE
 from Constants.image_path import KEY
 
-from Models.key import Key
+from Models.key import Key, ColorBasedActionFetcher
 
 class KeyDataLoader(Protocol):
     def load_keys(self) -> list[Key]:
@@ -17,9 +17,11 @@ class ConstantsKeyDataLoader():
         from Constants.interface import KEYS_DATA
 
         keys = []
+        action_fetcher = ColorBasedActionFetcher()
         
         for key_index in KEYS_DATA:
             current_key = Key(
+                action_fetcher=action_fetcher,
                 x_position = KEYS_DATA[key_index]["X"],
                 y_position = KEYS_DATA[key_index]["Y"],
                 height = KEYS_DATA[key_index]["Height"],
