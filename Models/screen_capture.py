@@ -2,7 +2,6 @@ from mss import mss
 from dataclasses import dataclass
 from multiprocessing import Event, Queue
 
-
 import numpy
 import time
 
@@ -18,8 +17,6 @@ class ScreenCapture():
 class ScreenCaptureManager():
     def run(self) -> None:
         from Constants.cooldown import SCREENSHOT_INTERVAL
-        from matplotlib import pyplot
-
 
         while not self._stop_event.is_set():
             screenshot_image = self._screen_capture.capture_screen(self._region)
@@ -27,12 +24,15 @@ class ScreenCaptureManager():
             color_corrected_screenshot = numpy.array(rgb_screenshot)[..., ::-1]
 
             try:
-                self._screenshot_queue.put(color_corrected_screenshot, block=False)
+                self.add_to_queue(color_corrected_screenshot)
             except:
-                time.sleep(SCREENSHOT_INTERVAL)
                 continue
 
-            time.sleep(SCREENSHOT_INTERVAL)
+    def add_to_queue(self, item):
+        if self._screenshot_queue.full():
+            self._screenshot_queue.get()
+
+        self._screenshot_queue.put(item)
 
     def __init__(self, screen_capture: ScreenCapture, screenshot_queue: Queue, region: dict[str, int]):
         self._screen_capture = screen_capture

@@ -5,8 +5,7 @@ from Models.screen_capture import start_screen_capture
 
 from repertoire_automation import RepertoireAutomation, InterfaceManager, AutoplayManager, KeyProcessor, NoteFetcher, WorkManager
 
-from multiprocessing import Queue
-from multiprocessing import Process
+from multiprocessing import Queue, Process
 
 if __name__ == "__main__":
     keyboard_queue = Queue()
@@ -26,7 +25,7 @@ if __name__ == "__main__":
     work_manager = WorkManager(processes_manager)
     autoplay_manager = AutoplayManager(game_interface, key_processor, work_manager)
 
-    screenshot_queue = Queue(maxsize=6)
+    screenshot_queue = Queue(maxsize = 6)
     screen_region = game_interface.region()
     screenshot_process = Process(target=start_screen_capture, args=(screen_region, screenshot_queue,))
     screenshot_process.daemon = True

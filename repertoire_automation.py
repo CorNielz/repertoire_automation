@@ -41,22 +41,18 @@ class KeyProcessor:
         self._note_fetcher = note_fetcher
 
     def process_key(self, key: Key, keyboard_queue, screenshot_queue) -> None:
-        from Constants.cooldown import NOTE_DETECTION
-
         while True:
             try:
-                screenshot = screenshot_queue.get(block=True, timeout=0.1)
+                screenshot = screenshot_queue.get(block=True)
             except:
                 continue
     
             note_type = key.verify_note_type_in_key(screenshot)
             
             if note_type == KeyboardAction.NONE:
-                time.sleep(NOTE_DETECTION)
                 continue
-
+            
             keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
-            time.sleep(NOTE_DETECTION)    
 
 class NoteFetcher:
     def fetch_note_action(self, key: Key):
