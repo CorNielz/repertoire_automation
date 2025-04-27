@@ -26,7 +26,7 @@ if __name__ == "__main__":
     work_manager = WorkManager(processes_manager)
     autoplay_manager = AutoplayManager(game_interface, key_processor, work_manager)
 
-    screenshot_queue = Queue(maxsize=12)
+    screenshot_queue = Queue(maxsize=30)
     screen_region = game_interface.region()
     screenshot_process = Process(target=start_screen_capture, args=(screen_region, screenshot_queue,))
     screenshot_process.daemon = True

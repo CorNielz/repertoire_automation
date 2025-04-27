@@ -23,12 +23,18 @@ class AutoplayManager:
         self._is_autoplay_on = False
 
     def start_autoplay(self, keyboard_queue, screenshot_queue):
+        if self._is_autoplay_on:
+            return
+    
         self._is_autoplay_on = True
         self.autoplay_mode(keyboard_queue, screenshot_queue)
 
     def autoplay_mode(self, keyboard_queue, screenshot_queue):
         for game_key in self._game_interface.keys:
             self._work_manager.send_work(self._key_processor.process_key, game_key, keyboard_queue, screenshot_queue)
+
+    def stop_autoplay(self):
+        self._work_manager.close_work(self._key_processor.process_key.__name__)
 
 class KeyProcessor:
     def __init__(self, note_fetcher: "NoteFetcher"):
@@ -63,6 +69,9 @@ class WorkManager:
     def send_work(self, method, *arguments):
         self._processes_manager.send_work(method, *arguments)
 
+    def close_work(self, method_name):
+        self._processes_manager.close_process_by_name(method_name)
+
 class RepertoireAutomation:
     def __init__(self, interface_manager: InterfaceManager, autoplay_manager: AutoplayManager, ):
         self._interface_manager = interface_manager
@@ -74,6 +83,8 @@ class RepertoireAutomation:
         while True:
             if not self._interface_manager.is_game_on_screen():
                 self._autoplay_manager._is_autoplay_on = False
+                self._autoplay_manager.stop_autoplay()
+                time.sleep(GAME_RUNNING_CHECK)
                 continue
 
             if not self._autoplay_manager._is_autoplay_on:
