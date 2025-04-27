@@ -1,6 +1,7 @@
 from Models.game_interface import GameInterfaceDetection, ConstantsKeyDataLoader, build_game_interface
 from Models.keyboard import start_keyboard
 from Models.work import ProcessesManager
+from Models.screen_capture import start_screen_capture
 
 from repertoire_automation import RepertoireAutomation, InterfaceManager, AutoplayManager, KeyProcessor, NoteFetcher, WorkManager
 
@@ -25,6 +26,12 @@ if __name__ == "__main__":
     work_manager = WorkManager(processes_manager)
     autoplay_manager = AutoplayManager(game_interface, key_processor, work_manager)
 
+    screenshot_queue = Queue(maxsize=12)
+    screen_region = game_interface.region()
+    screenshot_process = Process(target=start_screen_capture, args=(screen_region, screenshot_queue,))
+    screenshot_process.daemon = True
+    screenshot_process.start()
+
     repertoire_automation = RepertoireAutomation(interface_manager, autoplay_manager)
 
-    repertoire_automation.run(keyboard_queue)
+    repertoire_automation.run(keyboard_queue, screenshot_queue)

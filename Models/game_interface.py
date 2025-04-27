@@ -43,6 +43,9 @@ class GameInterface:
     def update_screen_resolution(self) -> None:
         self.screen_width, self.screen_height = pyautogui.size()
 
+    def region(self) -> dict[str, int]:
+        return {"top": 0, "left": 0, "width": self.screen_width, "height": self.screen_height}
+
 class GameInterfaceDetection:
     def is_game_on_screen(self) -> bool:
         try:

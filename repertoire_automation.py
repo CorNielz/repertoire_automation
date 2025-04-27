@@ -3,8 +3,8 @@ from Configs import automation
 from Enums.keyboard_action import KeyboardAction
 
 from Models.game_interface import GameInterfaceDetection, GameInterface
-from Models.work import ProcessesManager
 from Models.key import Key
+from Models.work import ProcessesManager
 
 import time
 
@@ -16,29 +16,34 @@ class InterfaceManager:
         return self._game_interface_detection.is_game_on_screen()
 
 class AutoplayManager:   
-    def __init__(self, game_interface: GameInterface, key_processor: "KeyProcessor", work_manager: "WorkManager"):
+    def __init__(self, game_interface: GameInterface, key_processor: "KeyProcessor", work_manager: "WorkManager", ):
         self._game_interface = game_interface
-        self._work_manager = work_manager
         self._key_processor = key_processor
+        self._work_manager = work_manager
         self._is_autoplay_on = False
 
-    def start_autoplay(self, keyboard_queue):
+    def start_autoplay(self, keyboard_queue, screenshot_queue):
         self._is_autoplay_on = True
-        self.autoplay_mode(keyboard_queue)
+        self.autoplay_mode(keyboard_queue, screenshot_queue)
 
-    def autoplay_mode(self, keyboard_queue):
+    def autoplay_mode(self, keyboard_queue, screenshot_queue):
         for game_key in self._game_interface.keys:
-            self._work_manager.send_work(self._key_processor.process_key, game_key, keyboard_queue)
+            self._work_manager.send_work(self._key_processor.process_key, game_key, keyboard_queue, screenshot_queue)
 
 class KeyProcessor:
     def __init__(self, note_fetcher: "NoteFetcher"):
         self._note_fetcher = note_fetcher
 
-    def process_key(self, key: Key, keyboard_queue) -> None:
+    def process_key(self, key: Key, keyboard_queue, screenshot_queue) -> None:
         from Constants.cooldown import NOTE_DETECTION
 
-        while True:            
-            note_type = key.verify_note_type_in_key()
+        while True:
+            try:
+                screenshot = screenshot_queue.get(block=True, timeout=1)
+            except:
+                continue
+    
+            note_type = key.verify_note_type_in_key(screenshot)
             
             if note_type == KeyboardAction.NONE:
                 time.sleep(NOTE_DETECTION)
@@ -63,7 +68,7 @@ class RepertoireAutomation:
         self._interface_manager = interface_manager
         self._autoplay_manager = autoplay_manager
 
-    def run(self, keyboard_queue):
+    def run(self, keyboard_queue, screenshot_queue):
         from Constants.cooldown import GAME_RUNNING_CHECK
 
         while True:
@@ -72,6 +77,6 @@ class RepertoireAutomation:
                 continue
 
             if not self._autoplay_manager._is_autoplay_on:
-                self._autoplay_manager.start_autoplay(keyboard_queue)
+                self._autoplay_manager.start_autoplay(keyboard_queue, screenshot_queue)
 
             time.sleep(GAME_RUNNING_CHECK)
