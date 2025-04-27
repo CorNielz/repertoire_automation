@@ -45,7 +45,7 @@ class KeyProcessor:
 
         while True:
             try:
-                screenshot = screenshot_queue.get(block=True, timeout=1)
+                screenshot = screenshot_queue.get(block=True, timeout=0.1)
             except:
                 continue
     
