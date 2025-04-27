@@ -1,5 +1,4 @@
 from multiprocessing import Process
-from concurrent.futures import ProcessPoolExecutor
 
 class ProcessesManager:
     def __init__(self):
@@ -11,7 +10,7 @@ class ProcessesManager:
         process.start()
 
         self._processes.append(process)
-    
+
     def close_process_by_name(self, method_name: str):
         for process in self._processes:
             if process.is_alive() and process.name == method_name:

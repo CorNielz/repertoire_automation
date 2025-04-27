@@ -22,37 +22,36 @@ class AutoplayManager:
         self._work_manager = work_manager
         self._is_autoplay_on = False
 
-    def start_autoplay(self, keyboard_queue, screenshot_queue):
+    def start_autoplay(self, keyboard_queue):
         if self._is_autoplay_on:
             return
-    
+        
         self._is_autoplay_on = True
-        self.autoplay_mode(keyboard_queue, screenshot_queue)
+        self.autoplay_mode(keyboard_queue)
 
-    def autoplay_mode(self, keyboard_queue, screenshot_queue):
+    def autoplay_mode(self, keyboard_queue):
         for game_key in self._game_interface.keys:
-            self._work_manager.send_work(self._key_processor.process_key, game_key, keyboard_queue, screenshot_queue)
+            self._work_manager.send_work(self._key_processor.process_key, game_key, keyboard_queue)
 
     def stop_autoplay(self):
-        self._work_manager.close_work(self._key_processor.process_key.__name__)
+        self._work_manager.close_work(self._key_processor.process_key.__name__) 
 
 class KeyProcessor:
     def __init__(self, note_fetcher: "NoteFetcher"):
         self._note_fetcher = note_fetcher
 
-    def process_key(self, key: Key, keyboard_queue, screenshot_queue) -> None:
-        while True:
-            try:
-                screenshot = screenshot_queue.get(block=True)
-            except:
-                continue
-    
-            note_type = key.verify_note_type_in_key(screenshot)
+    def process_key(self, key: Key, keyboard_queue) -> None:    
+        from Constants.cooldown import NOTE_DETECTION
+
+        while True:            
+            note_type = key.verify_note_type_in_key()
             
             if note_type == KeyboardAction.NONE:
+                time.sleep(NOTE_DETECTION)
                 continue
-            
+
             keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
+            time.sleep(NOTE_DETECTION)  
 
 class NoteFetcher:
     def fetch_note_action(self, key: Key):
@@ -69,11 +68,11 @@ class WorkManager:
         self._processes_manager.close_process_by_name(method_name)
 
 class RepertoireAutomation:
-    def __init__(self, interface_manager: InterfaceManager, autoplay_manager: AutoplayManager, ):
+    def __init__(self, interface_manager: InterfaceManager, autoplay_manager: AutoplayManager):
         self._interface_manager = interface_manager
         self._autoplay_manager = autoplay_manager
 
-    def run(self, keyboard_queue, screenshot_queue):
+    def run(self, keyboard_queue):
         from Constants.cooldown import GAME_RUNNING_CHECK
 
         while True:
@@ -81,9 +80,10 @@ class RepertoireAutomation:
                 self._autoplay_manager._is_autoplay_on = False
                 self._autoplay_manager.stop_autoplay()
                 time.sleep(GAME_RUNNING_CHECK)
+
                 continue
 
             if not self._autoplay_manager._is_autoplay_on:
-                self._autoplay_manager.start_autoplay(keyboard_queue, screenshot_queue)
+                self._autoplay_manager.start_autoplay(keyboard_queue)
 
             time.sleep(GAME_RUNNING_CHECK)

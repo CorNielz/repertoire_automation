@@ -8,6 +8,6 @@ PRESS_COLOR_RANGE = {
 # Hold color: (150, 130, 250)
 HOLD_COLOR_RANGE = {
     0: range(150, 160),
-    1: range(125, 140),
+    1: range(130, 140),
     2: range(245, 260),
 }
