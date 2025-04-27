@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import Protocol
 import pyautogui
+from mss import mss
+import numpy
 
 from Enums.keyboard_action import KeyboardAction
 
@@ -20,9 +22,19 @@ class ColorBasedActionFetcher():
         
         return KeyboardAction.NONE
     
+class ScreenCapture():
+    def __init__(self):
+        self._sct = mss()
+    
+    def capture_region(self, region: dict) -> numpy.ndarray:
+        sct_img = self._sct.grab(region)
+
+        return numpy.array(sct_img)
+    
 @dataclass
 class Key:
     action_fetcher: GetNoteAction
+    screen_capture: ScreenCapture
 
     x_position: int = field(default = 0)
     y_position: int = field(default = 0)
@@ -32,17 +44,18 @@ class Key:
     keyboard_key: str = field(default = "")
     is_key_hold: bool = field(default = False)
 
-    def verify_note_type_in_key(self) -> str:
-        key_range_screenshot = pyautogui.screenshot(region=self.region())
+    def verify_note_type_in_key(self) -> KeyboardAction:
+        key_range_screenshot = self.screen_capture.capture_region(self.region())
 
         for x in range(0, self.width, 10):
             for y in range(0, self.height, 10):
-                note = self.action_fetcher.fetch_note_action(key_range_screenshot.getpixel((x, y)))
+                color = key_range_screenshot[y, x][:3]
+                note = self.action_fetcher.fetch_note_action(color[::1])
 
                 if note != KeyboardAction.NONE:
                     return note
         
         return KeyboardAction.NONE
     
-    def region(self):
-        return (self.x_position, self.y_position, self.width, self.height)
+    def region(self) -> dict[str, int]:
+        return {"top": self.y_position, "left": self.x_position, "width": self.width, "height": self.height}
