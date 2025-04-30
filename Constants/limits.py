@@ -1,0 +1,1 @@
+NOTES_PER_GROUP = 2

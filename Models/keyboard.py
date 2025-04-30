@@ -2,8 +2,6 @@ from multiprocessing import Queue
 from abc import ABC, abstractmethod
 import pyautogui
 
-from Constants.cooldown import KEY_PRESS_INTERVAL
-
 from Enums.keyboard_action import KeyboardAction
 
 class KeyboardActionHandler:

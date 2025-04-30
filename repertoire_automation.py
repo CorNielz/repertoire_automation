@@ -32,11 +32,12 @@ class AutoplayManager:
         self.autoplay_mode(keyboard_queue)
 
     def autoplay_mode(self, keyboard_queue):
-        keys = list(self._game_interface.keys)
-        group_size = 2
+        from Constants.limits import NOTES_PER_GROUP
 
-        for i in range(0, len(keys), group_size):
-            key_group = keys[i:i + group_size]
+        keys = list(self._game_interface.keys)
+
+        for i in range(0, len(keys), NOTES_PER_GROUP):
+            key_group = keys[i:i + NOTES_PER_GROUP]
             self._work_manager.send_work(self._key_group_processor.run_key_group, key_group, keyboard_queue)
 
 
@@ -51,17 +52,19 @@ class KeyProcessor:
         while True:
             self.process_key(key, keyboard_queue)
             
-    def process_key(self, key: Key, keyboard_queue) -> None:    
-        from Constants.cooldown import NOTE_DETECTION
-
-        note_type = key.verify_note_type_in_key()
+    def process_key(self, key: Key, keyboard_queue) -> None:
+        last_found_note: KeyboardAction = None
+        note_type: KeyboardAction = key.verify_note_type_in_key()
         
         if note_type == KeyboardAction.NONE:
-            time.sleep(NOTE_DETECTION)
+            last_found_note = note_type
+            return
+        
+        if note_type == last_found_note:
             return
         
         keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
-        time.sleep(NOTE_DETECTION)
+        last_found_note = note_type
 
 class KeyGroupProcessor:
     def __init__(self, key_processor: KeyProcessor):
