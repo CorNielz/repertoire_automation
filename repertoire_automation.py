@@ -47,24 +47,24 @@ class AutoplayManager:
 class KeyProcessor:
     def __init__(self, note_fetcher: "NoteFetcher"):
         self._note_fetcher = note_fetcher
+        self._last_found_note = None
 
     def run_key(self, key: Key, keyboard_queue) -> None:    
         while True:
             self.process_key(key, keyboard_queue)
             
     def process_key(self, key: Key, keyboard_queue) -> None:
-        last_found_note: KeyboardAction = None
-        note_type: KeyboardAction = key.verify_note_type_in_key()
+        note_type = key.verify_note_type_in_key()
         
         if note_type == KeyboardAction.NONE:
-            last_found_note = note_type
+            self._last_found_note = note_type
             return
         
-        if note_type == last_found_note:
+        if note_type == self._last_found_note:
             return
         
         keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
-        last_found_note = note_type
+        self._last_found_note = note_type
 
 class KeyGroupProcessor:
     def __init__(self, key_processor: KeyProcessor):
