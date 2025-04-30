@@ -2,7 +2,7 @@ from Models.game_interface import GameInterfaceDetection, ConstantsKeyDataLoader
 from Models.keyboard import start_keyboard
 from Models.work import ProcessesManager
 
-from repertoire_automation import RepertoireAutomation, InterfaceManager, AutoplayManager, KeyProcessor, NoteFetcher, WorkManager
+from repertoire_automation import RepertoireAutomation, InterfaceManager, AutoplayManager, KeyProcessor, KeyGroupProcessor, NoteFetcher, WorkManager
 
 from multiprocessing import Queue, Process
 
@@ -20,9 +20,10 @@ if __name__ == "__main__":
     game_interface = build_game_interface(key_loader)
     note_fetcher = NoteFetcher()
     key_processor = KeyProcessor(note_fetcher)
+    key_group_processor = KeyGroupProcessor(key_processor)
     processes_manager = ProcessesManager()
     work_manager = WorkManager(processes_manager)
-    autoplay_manager = AutoplayManager(game_interface, key_processor, work_manager)
+    autoplay_manager = AutoplayManager(game_interface, key_processor, key_group_processor, work_manager)
 
     repertoire_automation = RepertoireAutomation(interface_manager, autoplay_manager)
 

@@ -16,9 +16,11 @@ class InterfaceManager:
         return self._game_interface_detection.is_game_on_screen()
 
 class AutoplayManager:   
-    def __init__(self, game_interface: GameInterface, key_processor: "KeyProcessor", work_manager: "WorkManager", ):
+    def __init__(self, game_interface: GameInterface, key_processor: "KeyProcessor", key_group_processor: "KeyGroupProcessor", work_manager: "WorkManager", ):
         self._game_interface = game_interface
         self._key_processor = key_processor
+        self._key_processor = key_processor
+        self._key_group_processor = key_group_processor
         self._work_manager = work_manager
         self._is_autoplay_on = False
 
@@ -30,28 +32,45 @@ class AutoplayManager:
         self.autoplay_mode(keyboard_queue)
 
     def autoplay_mode(self, keyboard_queue):
-        for game_key in self._game_interface.keys:
-            self._work_manager.send_work(self._key_processor.process_key, game_key, keyboard_queue)
+        keys = list(self._game_interface.keys)
+        group_size = 2
+
+        for i in range(0, len(keys), group_size):
+            key_group = keys[i:i + group_size]
+            self._work_manager.send_work(self._key_group_processor.run_key_group, key_group, keyboard_queue)
+
 
     def stop_autoplay(self):
-        self._work_manager.close_work(self._key_processor.process_key.__name__) 
+        self._work_manager.close_work(self._key_group_processor.run_key_group.__name__) 
 
 class KeyProcessor:
     def __init__(self, note_fetcher: "NoteFetcher"):
         self._note_fetcher = note_fetcher
 
+    def run_key(self, key: Key, keyboard_queue) -> None:    
+        while True:
+            self.process_key(key, keyboard_queue)
+            
     def process_key(self, key: Key, keyboard_queue) -> None:    
         from Constants.cooldown import NOTE_DETECTION
 
-        while True:            
-            note_type = key.verify_note_type_in_key()
-            
-            if note_type == KeyboardAction.NONE:
-                time.sleep(NOTE_DETECTION)
-                continue
+        note_type = key.verify_note_type_in_key()
+        
+        if note_type == KeyboardAction.NONE:
+            time.sleep(NOTE_DETECTION)
+            return
+        
+        keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
+        time.sleep(NOTE_DETECTION)
 
-            keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
-            time.sleep(NOTE_DETECTION)  
+class KeyGroupProcessor:
+    def __init__(self, key_processor: KeyProcessor):
+        self._key_processor = key_processor
+
+    def run_key_group(self, key_group: list[Key], keyboard_queue):
+        while True:     
+            for key in key_group:
+                self._key_processor.process_key(key, keyboard_queue)
 
 class NoteFetcher:
     def fetch_note_action(self, key: Key):
