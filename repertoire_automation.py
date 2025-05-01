@@ -19,7 +19,6 @@ class AutoplayManager:
     def __init__(self, game_interface: GameInterface, key_processor: "KeyProcessor", key_group_processor: "KeyGroupProcessor", work_manager: "WorkManager", ):
         self._game_interface = game_interface
         self._key_processor = key_processor
-        self._key_processor = key_processor
         self._key_group_processor = key_group_processor
         self._work_manager = work_manager
         self._is_autoplay_on = False
@@ -52,6 +51,8 @@ class KeyProcessor:
     def run_key(self, key: Key, keyboard_queue) -> None:    
         while True:
             self.process_key(key, keyboard_queue)
+
+            time.sleep(0.005)
             
     def process_key(self, key: Key, keyboard_queue) -> None:
         note_type = key.verify_note_type_in_key()
@@ -66,6 +67,8 @@ class KeyProcessor:
         keyboard_queue.put({"action": note_type, "key": key.keyboard_key})
         self._last_found_note = note_type
 
+        print(f"Note Sent to Queue: {time.time()}")
+
 class KeyGroupProcessor:
     def __init__(self, key_processor: KeyProcessor):
         self._key_processor = key_processor
@@ -74,6 +77,8 @@ class KeyGroupProcessor:
         while True:     
             for key in key_group:
                 self._key_processor.process_key(key, keyboard_queue)
+
+            time.sleep(0.005)
 
 class NoteFetcher:
     def fetch_note_action(self, key: Key):

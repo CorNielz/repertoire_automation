@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from dataclasses import field
 from typing import Protocol
+import mss
 import pyautogui
+from PIL import Image
+import time
 
 from Enums.keyboard_action import KeyboardAction
 
@@ -33,16 +36,28 @@ class Key:
     is_key_hold: bool = field(default = False)
 
     def verify_note_type_in_key(self) -> str:
-        key_range_screenshot = pyautogui.screenshot(region=self.region())
+        with mss.mss() as sct:
+            sct_img = sct.grab(self.monitor())
+            key_range_screenshot = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
 
-        for x in range(0, self.width, 10):
-            for y in range(0, self.height, 10):
-                note = self.action_fetcher.fetch_note_action(key_range_screenshot.getpixel((x, y)))
+        color = key_range_screenshot.getpixel(self.center())
+        note = self.action_fetcher.fetch_note_action(color)
 
-                if note != KeyboardAction.NONE:
-                    return note
-        
-        return KeyboardAction.NONE
+        if note != KeyboardAction.NONE:
+            print(f"Note detected: {time.time()}")
+
+        return note
     
     def region(self):
         return (self.x_position, self.y_position, self.width, self.height)
+    
+    def center(self):
+        return (self.width // 2, self.height // 2)
+    
+    def monitor(self):
+        return {
+                "left": self.x_position,
+                "top": self.y_position,
+                "width": self.width,
+                "height": self.height
+            }
